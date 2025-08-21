@@ -2,27 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(); // carrega .env
 
-  await dotenv.load();
+  try {
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
 
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+    print("✅ Conexão com Supabase realizada com sucesso!");
+  } catch (e) {
+    print("❌ Erro ao conectar com Supabase: $e");
+  }
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Meu App Igreja',
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Meu App Igreja')),
-        body: Center(child: Text('Bem-vindo!')),
+        body: Center(child: Text('App rodando!')),
       ),
     );
   }

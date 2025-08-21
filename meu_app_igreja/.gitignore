@@ -48,3 +48,4 @@ app.*.map.json
 *.keys
 android/local.properties
 
+.env
