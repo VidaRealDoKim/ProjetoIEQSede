@@ -1,0 +1,53 @@
+🌱 Início / Setup
+
+genesis: (início de tudo)
+
+alpha: (primeira versão, começo)
+
+foundation: (configurações iniciais)
+
+seed: (semeando a base do projeto)
+
+✨ Novas funcionalidades
+
+miracle: (quando adiciona uma grande função)
+
+parable: (pequenas histórias ou features menores)
+
+blessing: (adição útil ao app)
+
+light: (iluminar = trazer nova feature)
+
+🔧 Manutenções / Ajustes
+
+shepherd: (cuidando do rebanho → organizando código)
+
+manna: (pequenos ajustes para sustento do app)
+
+refine: (melhorias no código)
+
+repair: (conserto de bug)
+
+📦 Deploy / Versões
+
+exodus: (saindo da fase de dev → build pronto)
+
+revelation: (versão nova, revelando novidade)
+
+hallelujah: (commit de release principal)
+
+beta: (versão de testes)
+
+👉 Exemplo prático de fluxo de commits no seu app:
+
+genesis: configuração inicial do projeto Flutter + Supabase
+
+light: adiciona tela de login
+
+shepherd: organiza estrutura de pastas
+
+parable: cria card de versículos
+
+manna: corrige bug no botão de cadastro
+
+exodus: gera apk para testes internos
