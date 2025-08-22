@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/custom_input.dart';
+import '../widgets/custom_button.dart';
 
 /// Tela de recuperação de senha.
-/// Permite ao usuário solicitar o envio de um email para redefinir sua senha.
+/// Stateful para controlar estado do campo de email e loading do botão.
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -11,75 +13,95 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  /// Controlador do campo de email
+  // Controller para capturar o email digitado pelo usuário
   final TextEditingController _email = TextEditingController();
 
-  /// Indica se a tela está processando a solicitação (para mostrar loading)
+  // Controla estado de carregamento do botão
   bool _loading = false;
 
-  /// Armazena mensagem de sucesso ou erro para exibir ao usuário
-  String _message = "";
-
-  /// Função responsável por enviar o email de redefinição de senha via Supabase
+  /// Função para enviar email de redefinição de senha via Supabase
   Future<void> _resetPassword() async {
-    setState(() {
-      _loading = true;   // Ativa o indicador de carregamento
-      _message = "";     // Limpa mensagens anteriores
-    });
+    setState(() => _loading = true); // Ativa loading
 
     try {
-      // Solicita ao Supabase o envio do email de recuperação
-      await Supabase.instance.client.auth
-          .resetPasswordForEmail(_email.text.trim());
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        _email.text.trim(),
+      );
 
-      setState(() {
-        _message = "📩 Email de recuperação enviado!";
-      });
+      // Mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("📩 Email de recuperação enviado!")),
+      );
     } catch (e) {
-      // Captura erros e exibe na tela
-      setState(() {
-        _message = "❌ Erro: $e";
-      });
+      // Mensagem de erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ Erro: $e")),
+      );
     } finally {
-      // Desativa o loading independentemente do resultado
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false); // Desativa loading
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Esqueceu a senha")),
-
-      /// Corpo da tela centralizado
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Campo de email
-              TextField(
+      // Removida a AppBar, tela limpa
+      body: Container(
+        // Fundo com gradiente radial padrão do app
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 1.0,
+            colors: [Color(0xFF414141), Color(0xFF000000)],
+            stops: [0.20, 1.0],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Campo de email
+                CustomInput(
+                  hint: "Digite seu email",
                   controller: _email,
-                  decoration: const InputDecoration(labelText: "Digite seu email")),
-              const SizedBox(height: 20),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 24),
 
-              // Botão de envio ou indicador de carregamento
-              _loading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                onPressed: _resetPassword,
-                child: const Text("Enviar email"),
-              ),
-
-              // Mensagem de sucesso ou erro
-              if (_message.isNotEmpty) ...[
+                // Botão principal de envio de email
+                CustomButton(
+                  text: "Enviar email",
+                  loading: _loading,
+                  onPressed: _resetPassword,
+                ),
                 const SizedBox(height: 20),
-                Text(_message, style: const TextStyle(color: Colors.blue)),
+
+                // Botão secundário transparente para voltar ao login
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent, // transparente
+                      shadowColor: Colors.transparent, // remove sombra
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30), // mesmo estilo do CustomButton
+                      ),
+                    ),
+                    child: const Text(
+                      "Voltar para login",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFFE8E8E8), // texto branco/acinzentado
+                      ),
+                    ),
+                  ),
+                ),
               ],
-            ],
+            ),
           ),
         ),
       ),

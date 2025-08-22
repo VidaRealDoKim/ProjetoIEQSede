@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/custom_input.dart';
+import '../widgets/custom_button.dart';
 
-/// Tela de registro de novos usuários.
-/// Permite criar uma conta usando email e senha.
+/// Tela de cadastro de usuário.
+/// Stateful para controlar os campos e o estado de loading do botão.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -11,89 +13,139 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  /// Controlador do campo de email
+  // Controllers para capturar os dados digitados pelo usuário
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
   final TextEditingController _email = TextEditingController();
-
-  /// Controlador do campo de senha
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _church = TextEditingController();
 
-  /// Indica se está processando o registro (para mostrar um loading)
+  // Controla estado de carregamento do botão
   bool _loading = false;
 
-  /// Mensagem de erro a ser exibida caso o registro falhe
-  String _error = "";
+  // Controla se a senha está visível ou oculta
+  bool _obscurePassword = true;
 
-  /// Função responsável por registrar o usuário no Supabase
+  /// Função de registro no Supabase
   Future<void> _register() async {
-    setState(() {
-      _loading = true; // ativa o loading
-      _error = "";      // limpa erros anteriores
-    });
+    setState(() => _loading = true); // Ativa loading
 
     try {
-      // Faz o registro no Supabase usando email e senha
       final res = await Supabase.instance.client.auth.signUp(
         email: _email.text.trim(),
         password: _password.text.trim(),
+        data: {
+          'name': _name.text.trim(),
+          'phone': _phone.text.trim(),
+          'church': _church.text.trim(),
+        },
       );
 
-      // Se o registro for bem-sucedido, navega para a HomePage
+      // Se o usuário for criado com sucesso, navega para a home
       if (res.user != null) {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
-      // Se houver erro, armazena a mensagem para exibir ao usuário
-      setState(() {
-        _error = "❌ Erro no registro: $e";
-      });
+      // Mostra erro caso falhe
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ Erro no registro: $e")),
+      );
     } finally {
-      // Desativa o loading, independentemente do sucesso ou falha
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false); // Desativa loading
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Registrar")),
+      // Removido AppBar para tela limpa
+      body: Container(
+        // Fundo com gradiente radial padrão do app
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 1.0,
+            colors: [Color(0xFF414141), Color(0xFF000000)],
+            stops: [0.20, 1.0],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Campo de nome
+                CustomInput(hint: "Seu Nome Completo", controller: _name),
+                const SizedBox(height: 16),
 
-      /// Corpo da tela
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Campo de email
-              TextField(
+                // Campo de telefone
+                CustomInput(
+                  hint: "Seu Celular (DDD+Número)",
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+
+                // Campo de email
+                CustomInput(
+                  hint: "Seu Email",
                   controller: _email,
-                  decoration: const InputDecoration(labelText: "Email")),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
 
-              const SizedBox(height: 20),
-
-              // Campo de senha (oculta os caracteres)
-              TextField(
+                // Campo de senha com botão de visibilidade
+                CustomInput(
+                  hint: "Sua Senha",
                   controller: _password,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: "Senha")),
+                  obscure: _obscurePassword,
+                  suffix: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFFE8E8E8),
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-              const SizedBox(height: 30),
+                // Campo de igreja
+                CustomInput(hint: "Qual Igreja Frequenta?", controller: _church),
+                const SizedBox(height: 24),
 
-              // Botão de registrar ou indicador de carregamento
-              _loading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
+                // Botão principal de cadastro
+                CustomButton(
+                  text: "Cadastrar",
+                  loading: _loading,
                   onPressed: _register,
-                  child: const Text("Registrar")),
-
-              // Exibe mensagem de erro, se houver
-              if (_error.isNotEmpty) ...[
+                ),
                 const SizedBox(height: 20),
-                Text(_error, style: const TextStyle(color: Colors.red)),
+
+                // Botão transparente para voltar ao login
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent, // transparente
+                      shadowColor: Colors.transparent, // remove sombra
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: const Text(
+                      "Já tenho conta, voltar ao login",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFFE8E8E8),
+                      ),
+                    ),
+                  ),
+                ),
               ],
-            ],
+            ),
           ),
         ),
       ),

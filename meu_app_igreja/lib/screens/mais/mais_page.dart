@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../auth/login.dart';
+import '../../auth/login.dart';
 
 class MaisPage extends StatelessWidget {
   const MaisPage({super.key});

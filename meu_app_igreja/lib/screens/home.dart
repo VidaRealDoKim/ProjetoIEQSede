@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 // importa das outras screens
-import 'inicio_page.dart';
-import 'conteudo_page.dart';
-import 'eventos_page.dart';
-import 'ao_vivo_page.dart';
-import 'mais_page.dart';
+import 'inicio/inicio_page.dart';
+import 'conteudo/conteudo_page.dart';
+import 'eventos/eventos_page.dart';
+import 'aovivo/ao_vivo_page.dart';
+import 'mais/mais_page.dart';
 
 /// Página principal exibida após o login
 class HomePage extends StatefulWidget {
@@ -43,14 +43,45 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+
+        // Fundo da nav bar
+        backgroundColor: const Color(0xFF0D0D0D), // preto escuro
+
+        // Item selecionado
+        selectedItemColor: Colors.white, // branco
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+
+        // Item não selecionado
+        unselectedItemColor: Colors.grey, // cinza para contraste
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.normal,
+        ),
+
+        showUnselectedLabels: true, // mostra os labels mesmo não selecionados
+
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: "Conteúdo"),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: "Eventos"),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
-          BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: "Ao Vivo"),
-          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: "Mais"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book),
+            label: "Conteúdo",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: "Eventos",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Início",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.live_tv),
+            label: "Ao Vivo",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.more_horiz),
+            label: "Mais",
+          ),
         ],
       ),
     );
