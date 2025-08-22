@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Tela de login do usuário.
-/// Permite entrar no app usando email e senha.
-/// Possui recursos modernos:
-/// - Mensagens de erro em SnackBars.
-/// - Botão para salvar email.
-/// - Botão para visualizar/ocultar a senha.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -18,19 +12,13 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
-  /// Controle para mostrar ou ocultar a senha
   bool _obscurePassword = true;
-
-  /// Indica se o app está processando login
   bool _loading = false;
 
-  /// Indica se o usuário deseja salvar os dados
-  bool _rememberMe = false;
-
-  /// Função responsável por fazer login no Supabase
+  /// Função de login
   Future<void> _login() async {
     if (_email.text.isEmpty || _password.text.isEmpty) {
-      _showSnackBar("Por favor, preencha todos os campos!", isError: true);
+      _showSnackBar("Preencha todos os campos!", isError: true);
       return;
     }
 
@@ -43,28 +31,19 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (res.user != null) {
-        if (_rememberMe) {
-          // Aqui você pode salvar o email/local storage
-          // Exemplo simples usando SharedPreferences:
-          // final prefs = await SharedPreferences.getInstance();
-          // prefs.setString('saved_email', _email.text);
-        }
-
-        _showSnackBar("Login realizado com sucesso!", isError: false);
-
-        // Navega para a HomePage
+        _showSnackBar("✅ Login realizado com sucesso!", isError: false);
         Navigator.pushReplacementNamed(context, '/home');
       }
     } on AuthException catch (e) {
       _showSnackBar("❌ ${e.message}", isError: true);
     } catch (e) {
-      _showSnackBar("❌ Ocorreu um erro: $e", isError: true);
+      _showSnackBar("❌ Erro inesperado: $e", isError: true);
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  /// Mostra uma SnackBar moderna
+  /// Snackbar estilizada
   void _showSnackBar(String message, {required bool isError}) {
     final snackBar = SnackBar(
       content: Text(message, style: const TextStyle(fontSize: 16)),
@@ -83,98 +62,141 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Login",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 30),
-
-              // Campo de email
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Campo de senha
-              TextField(
-                controller: _password,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: "Senha",
-                  prefixIcon: const Icon(Icons.lock),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Checkbox para salvar email
-              Row(
-                children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (value) {
-                      setState(() => _rememberMe = value ?? false);
-                    },
-                  ),
-                  const Text("Salvar meus dados"),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Botão de login
-              _loading
-                  ? const CircularProgressIndicator()
-                  : SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text("Entrar", style: TextStyle(fontSize: 18)),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Botões de registro e recuperação
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/register'),
-                    child: const Text("Criar conta"),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/forgot'),
-                    child: const Text("Esqueceu a senha?"),
-                  ),
-                ],
-              ),
+      body: Container(
+        // Fundo com gradiente radial
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.topCenter,
+            radius: 1.0,
+            colors: [
+              Color(0xFF2D2A2A), // 17%
+              Color(0xFF0B0B0B), // 100%
             ],
+            stops: [0.17, 1.0],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ---------- LOGO ----------
+                SizedBox(
+                  height: 120,
+                  child: Image.asset(
+                    "assets/logo.png", // substitua pela sua logo
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // ---------- CAMPO EMAIL ----------
+                TextField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Color(0xFFE8E8E8)),
+                  decoration: InputDecoration(
+                    hintText: "Seu Email",
+                    hintStyle: const TextStyle(color: Color(0xFFE8E8E8)),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFDE6D56), width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ---------- CAMPO SENHA ----------
+                TextField(
+                  controller: _password,
+                  obscureText: _obscurePassword,
+                  style: const TextStyle(color: Color(0xFFE8E8E8)),
+                  decoration: InputDecoration(
+                    hintText: "Sua Senha",
+                    hintStyle: const TextStyle(color: Color(0xFFE8E8E8)),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFDE6D56), width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: const Color(0xFFE8E8E8),
+                      ),
+                      onPressed: () {
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // ---------- BOTÃO ENTRAR ----------
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDE6D56),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: _loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                      "Entrar",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFFE8E8E8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ---------- ESQUECI A SENHA ----------
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/forgot'),
+                  child: const Text(
+                    "Esqueci a senha",
+                    style: TextStyle(color: Color(0xFFE8E8E8)),
+                  ),
+                ),
+                const SizedBox(height: 60),
+
+                // ---------- CADASTRO ----------
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/register'),
+                  child: const Text(
+                    "Ainda não tem cadastro? Cadastre-se",
+                    style: TextStyle(color: Color(0xFFE8E8E8), fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
