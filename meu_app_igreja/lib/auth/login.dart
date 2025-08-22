@@ -83,10 +83,9 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 // ---------- LOGO ----------
                 SizedBox(
-                  height: 120,
+                  height: 80,
                   child: Image.asset(
-                    "assets/logo.png", // substitua pela sua logo
-                    fit: BoxFit.contain,
+                    "assets/images/logo.png",
                   ),
                 ),
                 const SizedBox(height: 40),
