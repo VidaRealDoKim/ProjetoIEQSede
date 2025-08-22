@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Página principal que será exibida após o login.
-/// Contém um menu inferior (BottomNavigationBar) com 5 abas:
-/// Início, Conteúdo, Eventos, Ao Vivo e Mais.
+// importa das outras screens
+import 'inicio_page.dart';
+import 'conteudo_page.dart';
+import 'eventos_page.dart';
+import 'ao_vivo_page.dart';
+import 'mais_page.dart';
+
+/// Página principal exibida após o login
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -11,23 +16,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  /// Índice da aba atualmente selecionada no menu inferior.
-  /// Começa em 0 (Início).
   int _selectedIndex = 0;
 
-  /// Lista de páginas que correspondem a cada item do menu inferior.
-  /// Por enquanto, cada página é apenas um `Center` com texto.
-  /// Depois você pode trocar por telas completas (ex: ConteudoPage, EventosPage, etc).
+  /// Lista de páginas que serão mostradas em cada aba
   final List<Widget> _pages = const [
-    Center(child: Text("🏠 Página Inicial", style: TextStyle(fontSize: 22))),
-    Center(child: Text("📖 Conteúdo", style: TextStyle(fontSize: 22))),
-    Center(child: Text("📅 Eventos", style: TextStyle(fontSize: 22))),
-    Center(child: Text("🎥 Ao Vivo", style: TextStyle(fontSize: 22))),
-    Center(child: Text("☰ Mais opções", style: TextStyle(fontSize: 22))),
+    ConteudoPage(),
+    EventosPage(),
+    InicioPage(),
+    AoVivoPage(),
+    MaisPage(),
   ];
 
-  /// Função chamada quando o usuário toca em um item do menu inferior.
-  /// Atualiza o `_selectedIndex` para mudar a página exibida.
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -37,22 +36,19 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /// Exibe a página correspondente ao índice selecionado
       body: _pages[_selectedIndex],
 
-      /// Menu inferior de navegação
+      /// Menu inferior
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Item atualmente ativo
-        onTap: _onItemTapped, // Função chamada ao clicar
-        type: BottomNavigationBarType.fixed, // Mantém todos os ícones visíveis
-        selectedItemColor: Colors.blue, // Cor do item selecionado
-        unselectedItemColor: Colors.grey, // Cor dos itens não selecionados
-
-        /// Itens do menu inferior
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: "Conteúdo"),
           BottomNavigationBarItem(icon: Icon(Icons.event), label: "Eventos"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
           BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: "Ao Vivo"),
           BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: "Mais"),
         ],
