@@ -1,13 +1,21 @@
+// -----------------------------------------------------------------------------
+// Importações principais do Flutter
+// -----------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 
-// importa das outras screens
+// -----------------------------------------------------------------------------
+// Importações internas (telas vinculadas às abas da HomePage)
+// -----------------------------------------------------------------------------
 import 'inicio/inicio_page.dart';
 import 'conteudo/conteudo_page.dart';
 import 'eventos/eventos_page.dart';
 import 'aovivo/ao_vivo_page.dart';
 import 'mais/mais_page.dart';
 
-/// Página principal exibida após o login
+// -----------------------------------------------------------------------------
+// Classe HomePage
+// Tela principal exibida após o login, contendo navegação por abas inferiores.
+// -----------------------------------------------------------------------------
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -16,17 +24,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// Índice da aba atualmente selecionada no BottomNavigationBar
   int _selectedIndex = 0;
 
-  /// Lista de páginas que serão mostradas em cada aba
+  /// Lista de páginas que serão exibidas de acordo com o índice selecionado
   final List<Widget> _pages = const [
-    ConteudoPage(),
-    EventosPage(),
-    InicioPage(),
-    AoVivoPage(),
-    MaisPage(),
+    ConteudoPage(), // Página de Conteúdo
+    EventosPage(),  // Página de Eventos
+    InicioPage(),   // Página Inicial
+    AoVivoPage(),   // Página de Transmissões ao Vivo
+    MaisPage(),     // Página de Configurações/Opções adicionais
   ];
 
+  /// Função responsável por atualizar o índice ao tocar em um item da barra
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -36,31 +46,37 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Corpo da página exibindo a tela correspondente ao índice selecionado
       body: _pages[_selectedIndex],
 
-      /// Menu inferior
+      // -----------------------------------------------------------------------
+      // Barra de navegação inferior (BottomNavigationBar)
+      // Responsável por permitir a troca entre as principais telas do app.
+      // -----------------------------------------------------------------------
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: _selectedIndex, // Aba ativa
+        onTap: _onItemTapped,         // Atualiza índice ao clicar
         type: BottomNavigationBarType.fixed,
 
-        // Fundo da nav bar
-        backgroundColor: const Color(0xFF0D0D0D), // preto escuro
+        // Estilo da barra
+        backgroundColor: const Color(0xFF0D0D0D), // Preto escuro de fundo
 
-        // Item selecionado
-        selectedItemColor: Colors.white, // branco
+        // Estilo dos itens selecionados
+        selectedItemColor: Colors.white, // Branco
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.bold,
         ),
 
-        // Item não selecionado
-        unselectedItemColor: Colors.grey, // cinza para contraste
+        // Estilo dos itens não selecionados
+        unselectedItemColor: Colors.grey, // Cinza para contraste
         unselectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.normal,
         ),
 
-        showUnselectedLabels: true, // mostra os labels mesmo não selecionados
+        // Exibe labels mesmo quando não selecionados
+        showUnselectedLabels: true,
 
+        // Itens de navegação (rotas principais do app)
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),

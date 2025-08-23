@@ -1,10 +1,20 @@
+// -----------------------------------------------------------------------------
+// Importações principais do Flutter e pacotes externos
+// -----------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+// -----------------------------------------------------------------------------
+// Importações internas (widgets customizados do projeto)
+// -----------------------------------------------------------------------------
 import '../widgets/custom_input.dart';
 import '../widgets/custom_button.dart';
 
-/// Tela de recuperação de senha.
-/// Stateful para controlar estado do campo de email e loading do botão.
+// -----------------------------------------------------------------------------
+// Classe ForgotPasswordPage
+// Tela de recuperação de senha.
+// Permite ao usuário solicitar redefinição de senha via Supabase.
+// -----------------------------------------------------------------------------
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -13,15 +23,20 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  // Controller para capturar o email digitado pelo usuário
+  // ---------------------------------------------------------------------------
+  // Controlador do campo de email
+  // ---------------------------------------------------------------------------
   final TextEditingController _email = TextEditingController();
 
-  // Controla estado de carregamento do botão
+  // Controla estado de carregamento do botão de envio
   bool _loading = false;
 
-  /// Função para enviar email de redefinição de senha via Supabase
+  // ---------------------------------------------------------------------------
+  // Função para enviar email de redefinição de senha via Supabase
+  // Mostra mensagens de feedback (sucesso ou erro) com SnackBar.
+  // ---------------------------------------------------------------------------
   Future<void> _resetPassword() async {
-    setState(() => _loading = true); // Ativa loading
+    setState(() => _loading = true); // Ativa estado de carregamento
 
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(
@@ -42,12 +57,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Construção da interface (UI)
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Removida a AppBar, tela limpa
+      // Tela sem AppBar, mais limpa
       body: Container(
-        // Fundo com gradiente radial padrão do app
+        // Fundo com gradiente radial (tema visual padrão do app)
         decoration: const BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.center,
@@ -56,13 +74,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             stops: [0.20, 1.0],
           ),
         ),
+
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Campo de email
+                // -------------------------------------------------------------
+                // Campo de Email
+                // -------------------------------------------------------------
                 CustomInput(
                   hint: "Digite seu email",
                   controller: _email,
@@ -70,7 +91,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Botão principal de envio de email
+                // -------------------------------------------------------------
+                // Botão principal para envio do email de redefinição
+                // -------------------------------------------------------------
                 CustomButton(
                   text: "Enviar email",
                   loading: _loading,
@@ -78,14 +101,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Botão secundário transparente para voltar ao login
+                // -------------------------------------------------------------
+                // Botão secundário "Voltar para login"
+                // Estilo transparente para diferenciar da ação principal
+                // -------------------------------------------------------------
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent, // transparente
-                      shadowColor: Colors.transparent, // remove sombra
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30), // mesmo estilo do CustomButton
@@ -95,7 +121,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       "Voltar para login",
                       style: TextStyle(
                         fontSize: 18,
-                        color: Color(0xFFE8E8E8), // texto branco/acinzentado
+                        color: Color(0xFFE8E8E8), // branco/acinzentado
                       ),
                     ),
                   ),
