@@ -1,16 +1,26 @@
+// -----------------------------------------------------------------------------
+// Importações principais
+// -----------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// ============================================
-/// Tela de detalhes de um conteúdo
-/// ============================================
+// -----------------------------------------------------------------------------
+// ConteudoDetalhePage
+// Tela de detalhes de um conteúdo específico.
+// Mostra:
+// - Imagem de capa (se existir)
+// - Título, subtítulo, autor e descrição
+// - Abas: Áudio, Texto, Materiais de apoio
+//
+// Também registra e atualiza progresso do usuário na tabela `usuario_progresso`.
+// -----------------------------------------------------------------------------
 class ConteudoDetalhePage extends StatefulWidget {
   final int conteudoId;       // ID do conteúdo no banco
-  final String titulo;        // título principal
-  final String? subtitulo;    // subtítulo opcional
+  final String titulo;        // Título principal
+  final String? subtitulo;    // Subtítulo opcional
   final String? imagemUrl;    // URL da imagem de destaque
-  final String? autor;        // autor do conteúdo
-  final String? descricao;    // descrição do conteúdo
+  final String? autor;        // Nome do autor (ex: pastor)
+  final String? descricao;    // Breve descrição
 
   const ConteudoDetalhePage({
     super.key,
@@ -26,44 +36,61 @@ class ConteudoDetalhePage extends StatefulWidget {
   State<ConteudoDetalhePage> createState() => _ConteudoDetalhePageState();
 }
 
+// -----------------------------------------------------------------------------
+// Estado da página de detalhes
+// -----------------------------------------------------------------------------
 class _ConteudoDetalhePageState extends State<ConteudoDetalhePage> {
   final supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
-    // Marca 0% de progresso ao abrir o conteúdo
+    // Ao abrir o conteúdo pela primeira vez, registra progresso inicial (0%)
     _salvarProgresso(0.0);
   }
 
-  /// Salva ou atualiza o progresso do usuário no Supabase
+  // ---------------------------------------------------------------------------
+  // Salva ou atualiza progresso do usuário no Supabase
+  //
+  // - progresso: valor entre 0.0 e 1.0 (0% a 100%)
+  // - utiliza `upsert` com `onConflict` para sobrescrever caso já exista
+  // ---------------------------------------------------------------------------
   Future<void> _salvarProgresso(double progresso) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
 
-    // Usando upsert com onConflict (forma correta da versão atual do Supabase Flutter)
     await supabase.from('usuario_progresso').upsert(
       {
         'usuario_id': userId,
         'conteudo_id': widget.conteudoId,
         'progresso': progresso,
-        'atualizado_em': DateTime.now().toIso8601String(), // atualiza timestamp
+        'atualizado_em': DateTime.now().toIso8601String(), // registra timestamp
       },
       onConflict: 'usuario_conteudo_unique',
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Construção da interface
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3, // número de abas: Áudio, Texto, Materiais
+      length: 3, // abas: Áudio, Texto, Materiais
       child: Scaffold(
         backgroundColor: const Color(0xFF0B0B0B),
+
+        // ---------- AppBar ----------
         appBar: AppBar(
           backgroundColor: const Color(0xFF171717),
           iconTheme: const IconThemeData(color: Colors.white),
-          title: Text(widget.titulo, style: const TextStyle(color: Colors.white)),
+          title: Text(
+            widget.titulo,
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
+
+        // ---------- Corpo ----------
         body: Column(
           children: [
             // ---------- Header com imagem ----------
@@ -75,23 +102,53 @@ class _ConteudoDetalhePageState extends State<ConteudoDetalhePage> {
                 fit: BoxFit.cover,
               ),
 
-            // ---------- Título, subtítulo e autor ----------
+            // ---------- Título, subtítulo, autor e descrição ----------
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.titulo,
-                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  // Título
+                  Text(
+                    widget.titulo,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  // Subtítulo
                   if (widget.subtitulo != null)
-                    Text(widget.subtitulo!, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                    Text(
+                      widget.subtitulo!,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+
+                  // Autor
                   if (widget.autor != null)
-                    Text("Pastor • ${widget.autor}", style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                    Text(
+                      "Pastor • ${widget.autor}",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+
+                  // Descrição
                   if (widget.descricao != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(widget.descricao!,
-                          style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                      child: Text(
+                        widget.descricao!,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -113,18 +170,23 @@ class _ConteudoDetalhePageState extends State<ConteudoDetalhePage> {
             Expanded(
               child: TabBarView(
                 children: [
-                  // Aba Áudio
+                  // ------------------------- Aba Áudio -------------------------
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.audiotrack, color: Colors.white, size: 100),
+                        const Icon(Icons.audiotrack,
+                            color: Colors.white, size: 100),
                         const SizedBox(height: 8),
-                        const Text("Player de Áudio aqui", style: TextStyle(color: Colors.white)),
+                        const Text(
+                          "Player de Áudio aqui",
+                          style: TextStyle(color: Colors.white),
+                        ),
                         const SizedBox(height: 16),
+
+                        // Botão que simula progresso parcial (50%)
                         ElevatedButton(
                           onPressed: () {
-                            // Simula progresso parcial (50%)
                             _salvarProgresso(0.5);
                           },
                           child: const Text("Simular 50% do áudio"),
@@ -133,17 +195,20 @@ class _ConteudoDetalhePageState extends State<ConteudoDetalhePage> {
                     ),
                   ),
 
-                  // Aba Texto
+                  // ------------------------- Aba Texto -------------------------
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        const Text("Aqui vai o conteúdo em texto...",
-                            style: TextStyle(color: Colors.white)),
+                        const Text(
+                          "Aqui vai o conteúdo em texto...",
+                          style: TextStyle(color: Colors.white),
+                        ),
                         const SizedBox(height: 16),
+
+                        // Botão que marca conteúdo como concluído (100%)
                         ElevatedButton(
                           onPressed: () {
-                            // Marca conteúdo como concluído (100%)
                             _salvarProgresso(1.0);
                           },
                           child: const Text("Marcar como concluído"),
@@ -152,11 +217,13 @@ class _ConteudoDetalhePageState extends State<ConteudoDetalhePage> {
                     ),
                   ),
 
-                  // Aba Materiais de apoio
+                  // ------------------- Aba Materiais de apoio ------------------
                   const SingleChildScrollView(
                     padding: EdgeInsets.all(16.0),
-                    child: Text("Lista de PDFs, slides ou links de apoio.",
-                        style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      "Lista de PDFs, slides ou links de apoio.",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
