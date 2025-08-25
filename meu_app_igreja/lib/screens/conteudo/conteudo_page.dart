@@ -38,7 +38,7 @@ class ConteudoPage extends StatelessWidget {
 
       // AppBar minimalista
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D0D0D),
+        backgroundColor: const Color(0xFF2B2B2B),
         elevation: 0,
         title: const Text("Conteúdo", style: TextStyle(color: Colors.white)),
       ),
