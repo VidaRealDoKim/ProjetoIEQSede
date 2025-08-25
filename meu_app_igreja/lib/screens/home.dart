@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
         type: BottomNavigationBarType.fixed,
 
         // Estilo da barra
-        backgroundColor: const Color(0xFF0D0D0D), // Preto escuro de fundo
+        backgroundColor: const Color(0xFF2B2B2B), // Preto escuro de fundo
 
         // Estilo dos itens selecionados
         selectedItemColor: Colors.white, // Branco

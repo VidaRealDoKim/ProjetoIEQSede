@@ -9,8 +9,13 @@ class InicioPage extends StatelessWidget {
     final user = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
+
+      backgroundColor: const Color(0xFF171717),
       appBar: AppBar(
-        title: const Text("Início"),
+
+        backgroundColor: const Color(0xFF2B2B2B),
+        elevation: 0,
+        title: const Text("Inicio", style: TextStyle(color: Colors.white)),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.notifications)),
         ],
@@ -23,7 +28,7 @@ class InicioPage extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               "Olá, ${user?.email ?? 'usuário'} 👋",
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20 , color: Colors.white),
             ),
           ],
         ),
