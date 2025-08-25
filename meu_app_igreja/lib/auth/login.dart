@@ -41,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
   // Realiza autenticação usando Supabase com email/senha.
   // Em caso de sucesso, redireciona para a HomePage.
   // Em caso de erro, exibe mensagem via SnackBar.
+  // Em caso de admin, redireciona para admin page.
   // ---------------------------------------------------------------------------
   Future<void> _login() async {
     setState(() => _loading = true);
@@ -52,8 +53,22 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (res.user != null) {
-        // Login bem-sucedido → redireciona para a tela inicial
-        Navigator.pushReplacementNamed(context, '/home');
+        final userId = res.user!.id;
+
+        // Busca se o usuário é admin (tabela pastores)
+        final response = await Supabase.instance.client
+            .from('pastores')
+            .select('is_admin')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (response != null && response['is_admin'] == true) {
+          // 🔑 Usuário é admin → vai para dashboard
+          Navigator.pushReplacementNamed(context, '/admin');
+        } else {
+          // 👤 Usuário normal → vai para home
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } else {
         // Credenciais inválidas
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +81,6 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
-      // Erro de conexão ou interno
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -79,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _loading = false);
     }
   }
+
 
   // ---------------------------------------------------------------------------
   // Construção da interface (UI)

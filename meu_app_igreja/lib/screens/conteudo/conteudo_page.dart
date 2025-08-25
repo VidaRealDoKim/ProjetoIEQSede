@@ -92,79 +92,114 @@ class ConteudoPage extends StatelessWidget {
                 const SectionTitle(title: "Em destaque"),
                 const SizedBox(height: 12),
 
-                // Estrutura da Lista formato carrossel
+                // -----------------------------------------------------------------------------
+                // Carrossel de destaques
+                // -----------------------------------------------------------------------------
+                // Exibe uma lista horizontal de conteúdos (destaques), cada item clicável
+                // para abrir a página de detalhes. A imagem de cada item é exibida com
+                // proporção 16:9, mantendo a consistência visual e evitando distorção.
+                // -----------------------------------------------------------------------------
+
                 SizedBox(
-                  height: 220,
+                  height: 200, // altura total do carrossel (container de cada item + título)
                   child: ListView(
-                    scrollDirection: Axis.horizontal,
+                    scrollDirection: Axis.horizontal, // rolagem horizontal
                     children: destaques.map((c) {
                       return GestureDetector(
-
-                        // ao clicar no conteúdo
+                        // ---------------------------------------------------------------------
+                        // Detecta o clique no item do carrossel
+                        // ---------------------------------------------------------------------
                         onTap: () {
                           Navigator.push(
                             context,
-                            // Retorno do click abrindo informações da lista dos supabase
                             MaterialPageRoute(
                               builder: (context) => ConteudoDetalhePage(
-                                conteudoId: c['id'],
-                                titulo: c['titulo'] ?? '',
-                                subtitulo: c['subtitulo'],
-                                imagemUrl: c['imagem_url'],
+                                conteudoId: c['id'],       // id do conteúdo no Supabase
+                                titulo: c['titulo'] ?? '',  // título do conteúdo
+                                subtitulo: c['subtitulo'],  // subtítulo do conteúdo
+                                imagemUrl: c['imagem_url'], // URL da imagem de capa
                               ),
-
                             ),
                           );
                         },
 
-                        // container do conteúdo da lista
+                        // ---------------------------------------------------------------------
+                        // Container do item do carrossel
+                        // ---------------------------------------------------------------------
                         child: Container(
-                          width: 160,
-                          margin: const EdgeInsets.only(right: 12),
+                          width: 220, // largura fixa do item
+                          margin: const EdgeInsets.only(right: 12), // espaçamento entre itens
                           decoration: BoxDecoration(
-                            color: Colors.grey[900],
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[900], // cor de fundo do container
+                            borderRadius: BorderRadius.circular(12), // cantos arredondados
                             boxShadow: [
                               BoxShadow(
-                                color: const Color.fromRGBO(0, 0, 0, 0.5),
+                                color: const Color.fromRGBO(0, 0, 0, 0.5), // sombra
                                 blurRadius: 6,
                                 offset: const Offset(0, 3),
                               ),
                             ],
                           ),
 
-                          // dentro do container uma coluna
+                          // -------------------------------------------------------------------
+                          // Conteúdo interno do container: coluna com imagem + título/subtítulo
+                          // -------------------------------------------------------------------
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Imagem de capa da lista
+                              // -----------------------------------------------------------------
+                              // Imagem de capa do item
+                              // -----------------------------------------------------------------
                               if (c['imagem_url'] != null)
                                 ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(12)),
-                                  child: Image.network(
-                                    c['imagem_url'],
-                                    height: 120,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                  child: AspectRatio(
+                                    aspectRatio: 16 / 9, // proporção 16:9 para todas as imagens
+                                    child: Image.network(
+                                      c['imagem_url'], // URL da imagem
+                                      fit: BoxFit.cover, // cobre todo o espaço sem distorcer
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey, // fallback caso a imagem não carregue
+                                          child: const Center(
+                                            child: Icon(Icons.broken_image, color: Colors.white),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
 
-                              // Título e subtítulo da lista
+                              // -----------------------------------------------------------------
+                              // Espaço para título e subtítulo do item
+                              // -----------------------------------------------------------------
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // Título do conteúdo
                                     Text(
                                       c['titulo'] ?? '',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2, // limite de linhas
+                                      overflow: TextOverflow.ellipsis, // corta texto excedente
                                     ),
+                                    // Subtítulo (opcional)
                                     if (c['subtitulo'] != null)
                                       Text(
                                         c['subtitulo'],
@@ -181,13 +216,14 @@ class ConteudoPage extends StatelessWidget {
                             ],
                           ),
                         ),
-
                       );
                     }).toList(),
                   ),
                 ),
 
+                // Espaçamento inferior após o carrossel
                 const SizedBox(height: 24),
+
 
                 // --------------- Seção: Continuar assistindo ------------------
                 const SectionTitle(title: "Continuar assistindo"),

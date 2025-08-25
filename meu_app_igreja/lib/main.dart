@@ -12,6 +12,7 @@ import 'auth/login.dart';
 import 'auth/register.dart';
 import 'auth/forgot_password.dart';
 import 'screens/home.dart';
+import 'screens/admin/admin_dashboard.dart';
 
 // -----------------------------------------------------------------------------
 // Função principal do aplicativo
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
         '/register':(context) => const RegisterPage(),       // Tela de Registro
         '/forgot':  (context) => const ForgotPasswordPage(), // Tela de Recuperação de Senha
         '/home':    (context) => const HomePage(),           // Tela Principal (Home)
+        '/admin':   (context) => const AdminDashboardPage(), // Tela de Administração
       },
     );
   }
