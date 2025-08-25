@@ -7,9 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // -----------------------------------------------------------------------------
 // Importações internas (abas do detalhe do conteúdo)
 // -----------------------------------------------------------------------------
-import 'conteudo_audio_tab.dart';
-import 'conteudo_texto_tab.dart';
-import 'conteudo_materiais_tab.dart';
+import 'labels/conteudo_audio_tab.dart';
+import 'labels/conteudo_texto_tab.dart';
+import 'labels/conteudo_materiais_tab.dart';
 
 // -----------------------------------------------------------------------------
 // ConteudoDetalhePage
