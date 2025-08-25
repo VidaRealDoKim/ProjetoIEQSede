@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'admin_conteudo_list.dart';
+import 'conteudo/admin_conteudo_list.dart';
 
 /// ===============================================================
 /// DASHBOARD ADMINISTRATIVO

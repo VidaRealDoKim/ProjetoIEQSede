@@ -184,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       "Esqueci a senha",
                       style: GoogleFonts.barlow(
-                        fontSize: 18,
+                        fontSize: 14,
                         color: const Color(0xFFE8E8E8),
                       ),
                     ),
