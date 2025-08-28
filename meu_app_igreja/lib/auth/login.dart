@@ -38,64 +38,70 @@ class _LoginPageState extends State<LoginPage> {
 
   // ---------------------------------------------------------------------------
   // Função de login
-  // Realiza autenticação usando Supabase com email/senha.
-  // Em caso de sucesso, redireciona para a HomePage.
-  // Em caso de erro, exibe mensagem via SnackBar.
-  // Em caso de admin, redireciona para admin page.
-  // ---------------------------------------------------------------------------
-  Future<void> _login() async {
-    setState(() => _loading = true);
+  // Realiza autenticação usando Supabase com email/senha. ---------------------------------------------------------------------------
+ Future<void> _login() async {
+  setState(() => _loading = true);
 
-    try {
-      final res = await Supabase.instance.client.auth.signInWithPassword(
-        email: _email.text.trim(),
-        password: _password.text.trim(),
-      );
+  try {
+    final res = await Supabase.instance.client.auth.signInWithPassword(
+      email: _email.text.trim(),
+      password: _password.text.trim(),
+    );
 
-      if (res.user != null) {
-        final userId = res.user!.id;
+    if (res.user != null) {
+      final userId = res.user!.id;
 
-        // Busca se o usuário é admin (tabela pastores)
-        final response = await Supabase.instance.client
-            .from('pastores')
-            .select('is_admin')
-            .eq('user_id', userId)
-            .maybeSingle();
+      // 🔎 Busca informações do perfil do usuário
+      final response = await Supabase.instance.client
+          .from('perfis')
+          .select('tipo_usuario, pastor, lider') // Pode adicionar mais campos aqui se precisar
+          .eq('id', userId)
+          .maybeSingle();
 
-        if (response != null && response['is_admin'] == true) {
-          // 🔑 Usuário é admin → vai para dashboard
-          Navigator.pushReplacementNamed(context, '/admin');
-        } else {
-          // 👤 Usuário normal → vai para home
-          Navigator.pushReplacementNamed(context, '/home');
+      if (response != null) {
+        String rota;
+
+        // ==========================
+        // 🔑 Definição dos caminhos
+        // ==========================
+
+        if (response['tipo_usuario'] == 'admin') {
+          rota = '/admin'; // Caminho para ADMIN
+        } else if (response['pastor'] == true) {
+          rota = '/pastor'; // Caminho para PASTOR
+        } else if (response['lider'] == true) {
+          rota = '/lider'; // Caminho para LIDER
+        } 
+        // 👉 Se precisar criar novos caminhos, adicione aqui:
+        // else if (response['novo_campo'] == true) {
+        //   rota = '/novaRota';
+        // }
+
+        else {
+          rota = '/home'; // Caminho padrão → usuário comum
         }
+
+        // 🚀 Redireciona para a rota definida
+        Navigator.pushReplacementNamed(context, rota);
+
       } else {
-        // Credenciais inválidas
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "❌ Email ou senha incorretos",
-              style: GoogleFonts.barlow(),
-            ),
-          ),
+          const SnackBar(content: Text("⚠️ Perfil não encontrado")),
         );
       }
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "❌ Erro: $e",
-            style: GoogleFonts.barlow(),
-          ),
-        ),
+        const SnackBar(content: Text("❌ Email ou senha incorretos")),
       );
-    } finally {
-      setState(() => _loading = false);
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("❌ Erro: $e")),
+    );
+  } finally {
+    setState(() => _loading = false);
   }
-
-
-  // ---------------------------------------------------------------------------
+} ---------------------------------------------------------------------------
   // Construção da interface (UI)
   // ---------------------------------------------------------------------------
   @override
