@@ -44,8 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-.env
+
 *.keys
 android/local.properties
-
 .env
