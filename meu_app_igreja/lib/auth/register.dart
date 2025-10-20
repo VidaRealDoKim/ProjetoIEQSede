@@ -1,6 +1,10 @@
+// ============================================================================
+// register.dart
+// Tela de registro de novos usuários com integração ao Supabase
+// ============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../widgets/custom_input.dart';
 import '../widgets/custom_button.dart';
 
@@ -12,26 +16,35 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // Instância do Supabase
   final supabase = Supabase.instance.client;
 
-  // Controladores de campos
-  final TextEditingController _name = TextEditingController();
-  final TextEditingController _phone = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _church = TextEditingController();
+  // Controladores de campos de formulário
+  final _name = TextEditingController();
+  final _phone = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _church = TextEditingController();
 
   bool _loading = false;
   bool _obscurePassword = true;
 
-  // ---------------------------------------------------------------------------
-  // Registro de usuário
-  // ---------------------------------------------------------------------------
+  // ==========================================================================
+  // Função de registro de novo usuário
+  // ==========================================================================
   Future<void> _register() async {
+    if (_name.text.isEmpty ||
+        _email.text.isEmpty ||
+        _password.text.isEmpty ||
+        _church.text.isEmpty) {
+      _showSnack("⚠️ Preencha todos os campos obrigatórios");
+      return;
+    }
+
     setState(() => _loading = true);
 
     try {
-      // 1. Criar usuário no Auth
+      // 1️⃣ Cria o usuário na autenticação do Supabase
       final res = await supabase.auth.signUp(
         email: _email.text.trim(),
         password: _password.text.trim(),
@@ -42,39 +55,47 @@ class _RegisterPageState extends State<RegisterPage> {
         },
       );
 
-      if (res.user != null) {
-        final userId = res.user!.id;
-
-        // 2. Inserir também na tabela `perfis`
-        await supabase.from('perfis').insert({
-          'id': userId, // mesmo id do auth.users
-          'nome': _name.text.trim(),
-          'telefone': _phone.text.trim(),
-          'igreja': _church.text.trim(),
-          'tipo_usuario': 'membro', // default
-        });
-
-        // 3. Redireciona
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+      final user = res.user;
+      if (user == null) {
+        _showSnack("❌ Erro ao criar usuário. Tente novamente.");
+        return;
       }
+
+      // 2️⃣ Insere o perfil básico do usuário na tabela `perfis`
+      await supabase.from('perfis').insert({
+        'id': user.id,
+        'nome': _name.text.trim(),
+        'telefone': _phone.text.trim(),
+        'igreja': _church.text.trim(),
+        'tipo_usuario': 'membro', // padrão
+      });
+
+      // 3️⃣ Redireciona para HomePage
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } on AuthException catch (e) {
+      _showSnack("Erro de autenticação: ${e.message}");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Erro no registro: $e")),
-      );
+      _showSnack("❌ Erro inesperado: $e");
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // UI
-  // ---------------------------------------------------------------------------
+  // Mostra mensagens simples via SnackBar
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // ==========================================================================
+  // Interface (UI)
+  // ==========================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Fundo gradiente escuro
         decoration: const BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.center,
@@ -88,20 +109,24 @@ class _RegisterPageState extends State<RegisterPage> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
+                // Campos principais
                 CustomInput(hint: "Seu Nome Completo", controller: _name),
                 const SizedBox(height: 16),
+
                 CustomInput(
-                  hint: "Seu Celular (DDD+Número)",
+                  hint: "Seu Celular (DDD + Número)",
                   controller: _phone,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
+
                 CustomInput(
                   hint: "Seu Email",
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
+
                 CustomInput(
                   hint: "Sua Senha",
                   controller: _password,
@@ -116,40 +141,52 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
                 CustomInput(
                   hint: "Qual Igreja Frequenta?",
                   controller: _church,
                 ),
                 const SizedBox(height: 24),
+
+                // Botão principal
                 CustomButton(
                   text: "Cadastrar",
                   loading: _loading,
                   onPressed: _register,
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      "Já tenho conta, voltar ao login",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFFE8E8E8),
-                      ),
-                    ),
-                  ),
-                ),
+
+                // Botão de voltar
+                _linkButton("Já tenho conta, voltar ao login", () {
+                  Navigator.pop(context);
+                }),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Botão secundário padronizado
+  Widget _linkButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        child: const Text(
+          "Já tenho conta, voltar ao login",
+          style: TextStyle(
+            fontSize: 18,
+            color: Color(0xFFE8E8E8),
           ),
         ),
       ),

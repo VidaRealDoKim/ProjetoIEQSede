@@ -1,77 +1,65 @@
-// -----------------------------------------------------------------------------
-// Importações principais do Flutter e pacotes externos
-// -----------------------------------------------------------------------------
+// ============================================================================
+// main.dart
+// Inicialização do app Flutter com Supabase e rotas principais
+// ============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-// -----------------------------------------------------------------------------
-// Importações internas (sistema de autenticação e telas principais)
-// -----------------------------------------------------------------------------
+// Telas do app
 import 'auth/login.dart';
 import 'auth/register.dart';
 import 'auth/forgot_password.dart';
 import 'screens/home.dart';
 import 'screens/admin/admin_dashboard.dart';
 
-// -----------------------------------------------------------------------------
-// Função principal do aplicativo
-// Responsável por inicializar configurações essenciais antes de rodar o app.
-// -----------------------------------------------------------------------------
 Future<void> main() async {
-  // Garante que o Flutter esteja completamente inicializado
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Carrega variáveis de ambiente do arquivo `.env`
-  // Necessário para obter as credenciais do Supabase (URL e Anon Key)
+  // Carrega variáveis de ambiente (.env) contendo URL e Anon Key do Supabase
   await dotenv.load();
 
+  // Inicializa conexão com Supabase
   try {
-    // Inicializa a conexão com o Supabase usando as variáveis do .env
     await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,         // URL do projeto Supabase
-      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,// Chave pública do projeto
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
     );
-
-    // Mensagem de sucesso no console
-    print("✅ Supabase conectado com sucesso!");
-
+    debugPrint("✅ Conexão Supabase estabelecida!");
   } catch (e) {
-    // Caso ocorra erro na conexão com o Supabase
-    print("❌ Erro ao conectar Supabase: $e");
+    debugPrint("❌ Falha ao conectar ao Supabase: $e");
   }
 
-  // Executa o aplicativo principal
   runApp(const MyApp());
 }
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // Classe principal do aplicativo
-// Define a estrutura base (MaterialApp) e o gerenciamento de rotas.
-// -----------------------------------------------------------------------------
+// Responsável por definir o MaterialApp, tema e rotas nomeadas
+// ============================================================================
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Remove a faixa vermelha "DEBUG" no canto superior direito
-      debugShowCheckedModeBanner: false,
-
-      // Define a tela inicial ao abrir o app
+      debugShowCheckedModeBanner: false, // remove o selo DEBUG
+      title: "Igreja App",
       initialRoute: '/login',
 
-      // -----------------------------------------------------------------------
-      // Rotas nomeadas do aplicativo
-      // Cada rota mapeia para uma página específica.
-      // -----------------------------------------------------------------------
       routes: {
-        '/login':   (context) => const LoginPage(),          // Tela de Login
-        '/register':(context) => const RegisterPage(),       // Tela de Registro
-        '/forgot':  (context) => const ForgotPasswordPage(), // Tela de Recuperação de Senha
-        '/home':    (context) => const HomePage(),           // Tela Principal (Home)
-        '/admin':   (context) => const AdminDashboardPage(), // Tela de Administração
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/forgot': (context) => const ForgotPasswordPage(),
+        '/home': (context) => const HomePage(),
+        '/admin': (context) => const AdminDashboardPage(),
       },
+
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+      ),
     );
   }
 }
