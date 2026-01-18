@@ -2,7 +2,7 @@
 // Importações principais
 // -----------------------------------------------------------------------------
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart'; // Descomentar quando conectar ao banco
 
 // -----------------------------------------------------------------------------
 // Importações internas (outras telas do app)
@@ -20,12 +20,31 @@ class ConteudoPage extends StatelessWidget {
   const ConteudoPage({super.key});
 
   // ---------------------------------------------------------------------------
-  // Busca os conteúdos da tabela `conteudos` no Supabase
-  // Retorna uma lista de mapas (cada mapa = 1 conteúdo)
+  // Busca os conteúdos (simulado - remover quando conectar ao Supabase)
+  // TODO: Criar tabela 'conteudos' no Supabase e descomentar linha abaixo
   // ---------------------------------------------------------------------------
   Future<List<Map<String, dynamic>>> _fetchConteudos() async {
-    final response = await Supabase.instance.client.from('conteudos').select();
-    return List<Map<String, dynamic>>.from(response);
+    // TEMPORÁRIO: Dados de exemplo
+    return [
+      {
+        'id': '1',
+        'titulo': 'Culto de Domingo',
+        'descricao': 'Culto especial de celebração',
+        'imagem_url': 'https://via.placeholder.com/400x225',
+        'criado_em': DateTime.now().toIso8601String(),
+      },
+      {
+        'id': '2',
+        'titulo': 'Estudo Bíblico',
+        'descricao': 'Estudo sobre João 3:16',
+        'imagem_url': 'https://via.placeholder.com/400x225',
+        'criado_em': DateTime.now().toIso8601String(),
+      },
+    ];
+    
+    // DESCOMENTAR quando criar tabela 'conteudos':
+    // final response = await Supabase.instance.client.from('conteudos').select();
+    // return List<Map<String, dynamic>>.from(response);
   }
 
   // ---------------------------------------------------------------------------

@@ -8,8 +8,9 @@ import '../../auth/login.dart';
 /// =============================================
 /// Página "Mais"
 /// =============================================
-/// Menu lateral/extra com acesso a Perfil, Bíblia, Doações, Agenda etc.
+/// Menu lateral/extra com acesso a Perfil, Configurações etc.
 /// Também gerencia o logout.
+/// Integração com tabela 'usuarios' do novo schema Supabase
 class MaisPage extends StatefulWidget {
   const MaisPage({super.key});
 
@@ -18,30 +19,35 @@ class MaisPage extends StatefulWidget {
 }
 
 class _MaisPageState extends State<MaisPage> {
-  Map<String, dynamic>? _perfil;
+  Map<String, dynamic>? _usuario;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _carregarPerfil();
+    _carregarUsuario();
   }
 
-  /// Busca os dados do perfil no Supabase
-  Future<void> _carregarPerfil() async {
+  /// Busca os dados do usuário na tabela 'usuarios'
+  Future<void> _carregarUsuario() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
-    final res = await Supabase.instance.client
-        .from('perfis')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    try {
+      final res = await Supabase.instance.client
+          .from('usuarios')
+          .select('id, nome, email, role, telefone, data_nascimento, foto_url')
+          .eq('id', user.id)
+          .maybeSingle();
 
-    setState(() {
-      _perfil = res;
-      _loading = false;
-    });
+      setState(() {
+        _usuario = res;
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('❌ Erro ao carregar usuário: $e');
+      setState(() => _loading = false);
+    }
   }
 
   /// Confirmação antes de fazer logout
@@ -50,8 +56,14 @@ class _MaisPageState extends State<MaisPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text("Confirmar saída", style: TextStyle(color: Colors.white)),
-        content: const Text("Você realmente deseja sair da sua conta?", style: TextStyle(color: Colors.grey)),
+        title: const Text(
+          "Confirmar saída",
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          "Você realmente deseja sair da sua conta?",
+          style: TextStyle(color: Colors.grey),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -86,8 +98,8 @@ class _MaisPageState extends State<MaisPage> {
       );
     }
 
-    final nome = _perfil?['nome'] ?? "Usuário";
-    final progresso = 0.26; // TODO: Calcular dinamicamente via backend
+    final nome = _usuario?['nome'] ?? "Usuário";
+    final role = _usuario?['role'] ?? "Membro";
 
     return Scaffold(
       backgroundColor: const Color(0xFF171717),
@@ -115,7 +127,11 @@ class _MaisPageState extends State<MaisPage> {
                       const CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.grey,
-                        child: Icon(Icons.person, size: 40, color: Colors.white),
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -130,14 +146,17 @@ class _MaisPageState extends State<MaisPage> {
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text("${(progresso * 100).toInt()}% Completo",
-                                style: const TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            LinearProgressIndicator(
-                              value: progresso,
-                              backgroundColor: Colors.grey[800],
-                              color: Colors.grey[500],
+                            Text(
+                              role,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Membro desde ${_usuario?['criado_em']?.toString().substring(0, 10) ?? 'N/A'}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -149,12 +168,21 @@ class _MaisPageState extends State<MaisPage> {
                   /// Navega para página de perfil
                   ListTile(
                     leading: const Icon(Icons.person, color: Colors.grey),
-                    title: const Text("Ver meu perfil", style: TextStyle(color: Colors.white)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    title: const Text(
+                      "Ver meu perfil",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const PerfilPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const PerfilPage(),
+                        ),
                       );
                     },
                   ),
@@ -195,7 +223,11 @@ class _MaisPageState extends State<MaisPage> {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[500]),
       title: Text(title, style: const TextStyle(color: Colors.white)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Colors.grey,
+      ),
       onTap: onTap,
     );
   }

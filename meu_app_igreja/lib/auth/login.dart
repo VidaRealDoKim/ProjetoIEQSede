@@ -1,6 +1,38 @@
 // ============================================================================
-// login.dart
-// Tela de login com autenticação via Supabase (email e senha)
+// login.dart - TELA DE LOGIN
+// ============================================================================
+//
+// OBJETIVO:
+// Autenticar usuário com email e senha via Supabase
+//
+// FLUXO:
+// 1. Usuário insere email e senha
+// 2. Valida se campos estão preenchidos
+// 3. Autentica com Supabase Auth
+// 4. Busca dados do usuário na tabela 'usuarios'
+// 5. Se não existe, cria registro automático
+// 6. Redireciona baseado no role:
+//    - 'Admin' → /admin (Dashboard Admin)
+//    - 'Pastor' → /home (Pode ser expandido para /pastor)
+//    - 'Lider' → /home (Pode ser expandido para /lider)
+//    - 'Membro' → /home (Default)
+//
+// VALIDAÇÕES:
+// - Email obrigatório
+// - Senha obrigatória (mínimo 6 caracteres)
+// - Erros tratados com try/catch
+// - Mensagens amigáveis ao usuário
+//
+// CAMPOS DA TABELA 'usuarios':
+// - id: UUID (Supabase Auth)
+// - nome: Nome do usuário
+// - email: Email único
+// - role: Admin, Pastor, Lider, Membro
+// - telefone: Número de contato
+// - data_nascimento: Data de nascimento
+// - foto_url: URL da foto de perfil
+// - criado_em: Timestamp de criação
+//
 // ============================================================================
 
 import 'package:flutter/material.dart';
@@ -51,27 +83,40 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // Busca tipo de perfil (admin, pastor, líder, membro)
-      final perfil = await supabase
-          .from('perfis')
-          .select('tipo_usuario')
+      // Busca dados do usuário na tabela 'usuarios' para verificar role
+      final usuario = await supabase
+          .from('usuarios')
+          .select('id, nome, role')
           .eq('id', user.id)
           .maybeSingle();
 
-      if (perfil == null) {
-        _showSnack("⚠️ Perfil não encontrado");
-        return;
+      if (usuario == null) {
+        // Primeiro login: cria registro na tabela usuarios
+        try {
+          await supabase.from('usuarios').insert({
+            'id': user.id,
+            'nome': user.email?.split('@')[0] ?? 'Usuário',
+            'email': user.email,
+            'role': 'Membro', // role padrão para novos usuários
+          });
+          debugPrint('✅ Registro de usuário criado com sucesso');
+        } catch (e) {
+          debugPrint('⚠️ Erro ao criar registro do usuário: $e');
+        }
       }
 
-      // Define a rota de acordo com o tipo de usuário
-      final rota = switch (perfil['tipo_usuario']) {
-        'admin' => '/admin',
-        'pastor' => '/pastor',
-        'lider' => '/lider',
+      // Define a rota de acordo com o role do usuário
+      final role = usuario?['role'] ?? 'Membro';
+      final rota = switch (role) {
+        'Admin' => '/admin',
+        'Pastor' => '/home', // pode redirecionar para /pastor se existir
+        'Lider' => '/home', // pode redirecionar para /lider se existir
         _ => '/home',
       };
 
-      Navigator.pushReplacementNamed(context, rota);
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, rota);
+      }
     } on AuthException catch (e) {
       _showSnack("Erro de autenticação: ${e.message}");
     } catch (e) {
@@ -83,7 +128,9 @@ class _LoginPageState extends State<LoginPage> {
 
   // Mostra uma mensagem simples na tela
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ==========================================================================

@@ -3,7 +3,6 @@
 // -----------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart'; // biblioteca para áudio
-import 'package:rxdart/rxdart.dart'; // para combinar streams de progresso
 
 // -----------------------------------------------------------------------------
 // ConteudoAudioTab
@@ -32,7 +31,9 @@ class _ConteudoAudioTabState extends State<ConteudoAudioTab> {
   void initState() {
     super.initState();
     // Exemplo de áudio local ou remoto
-    _player.setUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+    _player.setUrl(
+      'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    );
 
     // Atualiza posição do áudio em tempo real
     _player.positionStream.listen((pos) {
@@ -86,8 +87,14 @@ class _ConteudoAudioTabState extends State<ConteudoAudioTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_formatDuration(_position), style: const TextStyle(color: Colors.white)),
-              Text(_formatDuration(_duration), style: const TextStyle(color: Colors.white)),
+              Text(
+                _formatDuration(_position),
+                style: const TextStyle(color: Colors.white),
+              ),
+              Text(
+                _formatDuration(_duration),
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -109,7 +116,11 @@ class _ConteudoAudioTabState extends State<ConteudoAudioTab> {
                   final playerState = snapshot.data;
                   final playing = playerState?.playing ?? false;
                   return IconButton(
-                    icon: Icon(playing ? Icons.pause_circle : Icons.play_circle, size: 50, color: Colors.white),
+                    icon: Icon(
+                      playing ? Icons.pause_circle : Icons.play_circle,
+                      size: 50,
+                      color: Colors.white,
+                    ),
                     onPressed: () {
                       if (playing) {
                         _player.pause();
